@@ -1,0 +1,57 @@
+name: 핫픽스 오픈
+
+on:
+  workflow_dispatch:
+    inputs:
+      task_summary:
+        description: '작업 내역 요약을 적어주세요'
+        required: true
+        type: string
+
+env:
+  BRANCH_PREFIX: "hotfix"
+  TIMEZONE: "Asia/Seoul"
+
+jobs:
+  open-hotfix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code to master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Set git user
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Fetch some commits
+        run: git fetch --tags --depth=500 origin master
+
+      - name: Get current datetime
+        run: |
+          KST_DATE=$(TZ=$TIMEZONE date '+%Y%m%d')
+          echo "KST_DATE=$KST_DATE" >> $GITHUB_ENV
+
+      - name: Create hotfix branch and push to origin
+        run: |
+          git checkout -b ${{ env.BRANCH_PREFIX }}/${{ env.KST_DATE }}-1
+          git push -u origin ${{ env.BRANCH_PREFIX }}/${{ env.KST_DATE }}-1
+
+      - name: Create hotfix PR
+        uses: thomaseizinger/create-pull-request@master
+        with:
+          github_token: ${{ secrets.CREATE_PR_ACTION_TOKEN }}
+          head: refs/heads/${{ env.BRANCH_PREFIX }}/${{ env.KST_DATE }}-1
+          base: master
+          assignees: ${{ github.actor }}
+          title: "hotfix: ${{ env.KST_DATE }}-1"
+          body: |
+            ## Task summary
+            - ${{ github.event.inputs.task_summary }}
+            
+            ## Description
+            - 여기에 수정 사항에 대한 자세한 설명을 작성해 주세요.
+
+            이 PR 은 [Github Action #${{ github.run_number }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) 에서 생성됨.
