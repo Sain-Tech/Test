@@ -1,0 +1,27 @@
+name: Auto create hotfix PR
+
+on:
+  push:
+    branches:
+      - 'hotfix/**'
+
+jobs:
+  create-hotfix-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create hotfix PR
+        uses: thomaseizinger/create-pull-request@master
+        with:
+          github_token: ${{ secrets.CREATE_PR_ACTION_TOKEN }}
+          head: refs/heads/${{ github.event.workflow_run.head_branch }}
+          base: master
+          assignees: ${{ github.actor }}
+          title: "hotfix: ${{ github.event.workflow_run.head_branch }}"
+          body: |
+            ## Task summary
+            - 여기에 작업 요약을 적어주세요.
+            
+            ## Description
+            - 여기에 수정 사항에 대한 자세한 설명을 작성해 주세요.
+    
+            이 PR 은 [Github Action #${{ github.run_number }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) 에서 생성됨.
