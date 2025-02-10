@@ -2,7 +2,8 @@ name: Auto create hotfix PR
 
 on:
   push:
-    branches: [hotfix/**]
+    branches:
+      - 'hotfix/test'
 
 jobs:
   create-hotfix-pr:
