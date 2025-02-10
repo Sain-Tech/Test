@@ -3,7 +3,7 @@ name: Auto create hotfix PR
 on:
   push:
     branches:
-      - 'hotfix**'
+      - 'hotfix2'
 
 jobs:
   create-hotfix-pr:
